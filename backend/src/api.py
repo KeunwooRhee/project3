@@ -16,7 +16,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-#db_drop_and_create_all()
+db_drop_and_create_all()
 
 ## ROUTES
 '''
@@ -38,7 +38,7 @@ def get_drinks():
     return jsonify({
         "success": True, 
         "drinks": drinks
-    })
+    }), 200
 
 
 '''
@@ -51,7 +51,7 @@ def get_drinks():
 '''
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(self):
     drink_list = Drink.query.all()
     drinks = []
     for drink in drink_list:
@@ -60,7 +60,7 @@ def get_drinks_detail():
     return jsonify({
         "success": True, 
         "drinks": drinks
-    })
+    }), 200
     
 '''
 @TODO implement endpoint
@@ -71,6 +71,38 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+
+
+@app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
+def post_drinks(self):
+    requests = request.get_json()
+
+    title = requests['title']
+    recipe = requests['recipe']
+    print(title)
+    print(recipe)
+    print(type(title))
+    print(type(recipe))
+    '''
+    #[{'color': string, 'name':string, 'parts':number}]
+
+    
+    title = Column(String(80), unique=True)
+    # the ingredients blob - this stores a lazy json blob
+    # the required datatype is [{'color': string, 'name':string, 'parts':number}]
+    recipe =  Column(String(180), nullable=False)
+    '''
+
+    new_drink = Drink(title = title, recipe = json.dumps(recipe))
+    new_drink.insert()
+
+    drink = [new_drink.long()]
+
+    return jsonify({
+        "success": True, 
+        "drinks": drink
+    }), 200
 
 
 '''
@@ -105,10 +137,10 @@ Example error handling for unprocessable entity
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False, 
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
@@ -131,3 +163,11 @@ def unprocessable(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+        "success": False,
+        "error": error.status_code,
+        "message": error.error['description']
+    }), error.status_code
+    
