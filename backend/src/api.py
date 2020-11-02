@@ -86,9 +86,9 @@ def post_drinks(payload):
     requests = request.get_json()
 
     title = requests['title']
-    recipe = json.dumps([requests['recipe']])
-    print(title)
-    print(recipe)
+    recipe = json.dumps(requests['recipe'])
+   #print(title)
+    #print(recipe)
     #print(type(title))
     #print(type(recipe))
     '''
@@ -136,7 +136,7 @@ def update_drinks(payload, drink_id):
     requests = request.get_json()
     
     updated_drink.title = requests['title']
-    #updated_drink.recipe = json.dumps(requests['recipe'])
+    updated_drink.recipe = json.dumps(requests['recipe'])
 
     #print(title)
     #print(recipe)
