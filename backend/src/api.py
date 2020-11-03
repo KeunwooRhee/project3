@@ -28,11 +28,10 @@ db_drop_and_create_all()
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['GET'])
-def get_drinks():
-    
+def get_drinks():   
     drink_list = Drink.query.all()
-    print(drink_list)
     drinks = []
+
     for drink in drink_list:
         drinks.append(drink.short())
     
@@ -40,14 +39,8 @@ def get_drinks():
         "success": True, 
         "drinks": drinks
     }), 200
-    '''
-    drinks = Drink.short()
+    
 
-    return jsonify({
-        "success": True, 
-        "drinks": drinks
-    }), 200
-    '''
 '''
 @TODO implement endpoint
     GET /drinks-detail
@@ -78,8 +71,6 @@ def get_drinks_detail(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
-
-
 @app.route('/drinks', methods=['POST'])
 @requires_auth('post:drinks')
 def post_drinks(payload):
@@ -87,25 +78,15 @@ def post_drinks(payload):
 
     title = requests['title']
     recipe = json.dumps(requests['recipe'])
-   #print(title)
-    #print(recipe)
-    #print(type(title))
-    #print(type(recipe))
-    '''
-    #[{'color': string, 'name':string, 'parts':number}]
 
-    
-    title = Column(String(80), unique=True)
-    # the ingredients blob - this stores a lazy json blob
-    # the required datatype is [{'color': string, 'name':string, 'parts':number}]
-    recipe =  Column(String(180), nullable=False)
-    '''
+    # For checking it is newly created drink or not
+    if Drink.query.filter_by(title=title).one_or_none():
+        abort(422)
 
     new_drink = Drink(title = title, recipe = recipe)
     new_drink.insert()
 
     drink = new_drink.long()
-    #print(drink)
 
     return jsonify({
         "success": True, 
@@ -127,9 +108,8 @@ def post_drinks(payload):
 @app.route('/drinks/<int:drink_id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
 def update_drinks(payload, drink_id):
-    print(type(drink_id))
     updated_drink = Drink.query.filter_by(id=drink_id).one_or_none()
-    print(updated_drink)
+
     if updated_drink is None:
         abort(404)
     
@@ -138,21 +118,14 @@ def update_drinks(payload, drink_id):
     updated_drink.title = requests['title']
     updated_drink.recipe = json.dumps(requests['recipe'])
 
-    #print(title)
-    #print(recipe)
-
     updated_drink.update()
 
-    drink = [updated_drink.long()]
+    drink = updated_drink.long()
 
     return jsonify({
         "success": True, 
         "drinks": drink
     }), 200
-
-
-    #print(title)
-
 
 
 '''
@@ -168,9 +141,9 @@ def update_drinks(payload, drink_id):
 @app.route('/drinks/<int:drink_id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
 def delete_drinks(payload, drink_id):
-    #print(drink_id)
     deleted_drink = Drink.query.filter_by(id=drink_id).one_or_none()
-    #print(id)
+
+    #404 error: if <id> is not found
     if deleted_drink is None:
         abort(404)
 
@@ -228,4 +201,3 @@ def auth_error(error):
         "error": error.status_code,
         "message": error.error['description']
     }), error.status_code
-    
