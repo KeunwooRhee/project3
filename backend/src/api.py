@@ -78,7 +78,10 @@ def post_drinks(payload):
 
     title = requests['title']
     recipe = json.dumps(requests['recipe'])
-
+  
+    if not isinstance(recipe, list):
+        recipe = json.dumps([json.loads(recipe)])
+    
     # For checking it is newly created drink or not
     if Drink.query.filter_by(title=title).one_or_none():
         abort(422)
@@ -112,21 +115,24 @@ def update_drinks(payload, drink_id):
 
     if updated_drink is None:
         abort(404)
-    
+
     requests = request.get_json()
     
-    updated_drink.title = requests['title']
-    updated_drink.recipe = json.dumps(requests['recipe'])
-
+    for patched_attribute in requests:
+        if patched_attribute == 'title':
+            updated_drink.title = requests['title']
+        elif patched_attribute == 'recipe':
+            updated_drink.recipe = json.dumps(requests['recipe'])
+    
     updated_drink.update()
-
-    drink = updated_drink.long()
+    
+    drink = [updated_drink.long()]
 
     return jsonify({
         "success": True, 
         "drinks": drink
     }), 200
-
+    
 
 '''
 @TODO implement endpoint

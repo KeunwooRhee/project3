@@ -67,8 +67,6 @@ def get_token_auth_header():
     return token
 
 
-    #raise Exception('Not Implemented')
-
 '''
 @TODO implement check_permissions(permission, payload) method
     @INPUTS
@@ -91,10 +89,9 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'unauthorized',
             'description': 'Permission not found.'
-        }, 403)
+        }, 401)
     return True
 
-    #raise Exception('Not Implemented')
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -111,7 +108,6 @@ def check_permissions(permission, payload):
 '''
 def verify_decode_jwt(token):
     url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
-    #jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jsonurl = urlopen(url)
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)
@@ -166,7 +162,7 @@ def verify_decode_jwt(token):
             'code': 'invalid_header',
             'description': 'Unable to find the appropriate key.'
         }, 400)
-    #raise Exception('Not Implemented')
+
 
 '''
 @TODO implement @requires_auth(permission) decorator method
